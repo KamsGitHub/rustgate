@@ -1,0 +1,29 @@
+# Local development config: gateway on :8080, admin on :9901, demo services on :9001-9004.
+listeners:
+  data:
+    bind: "127.0.0.1:8080"
+  admin:
+    bind: "127.0.0.1:9901"
+
+clusters:
+  users:
+    endpoints: ["http://127.0.0.1:9001", "http://127.0.0.1:9002"]
+  orders:
+    endpoints: ["http://127.0.0.1:9003"]
+  analytics:
+    endpoints: ["http://127.0.0.1:9004"]
+
+routes:
+  - id: users-api
+    match: { path_prefix: /users }
+    cluster: users
+  - id: orders-api
+    match: { path_prefix: /orders }
+    cluster: orders
+  - id: analytics-api
+    match: { path_prefix: /analytics }
+    cluster: analytics
+  # Host-based routing: everything on orders.localhost goes to the orders cluster.
+  - id: orders-host
+    match: { host: orders.localhost, path_prefix: / }
+    cluster: orders
